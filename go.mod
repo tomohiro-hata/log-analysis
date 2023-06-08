@@ -1,3 +1,3 @@
 module github.com/tomohiro-hata/log-analysis
 
-go 1.15
+go 1.20
