@@ -10,7 +10,7 @@ import (
 	"github.com/tomohiro-hata/log-analysis/pkg/config"
 )
 
-func totalling(conf config.Config) {
+func totalling_to_csv(conf config.Config) {
 	// 結果格納変数
 	var result []Totalling
 	// 月格納変数

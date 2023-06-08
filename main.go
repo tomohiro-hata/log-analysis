@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/tomohiro-hata/log-analysis/pkg/config"
+	"github.com/tomohiro-hata/log-analysis/pkg/totalling"
 )
 
 func main() {
@@ -21,6 +22,6 @@ func main() {
 	json.Unmarshal(file, &config)
 	fmt.Println(config)
 	fmt.Println("start")
-	totalling.totalling(config)
+	totalling.totalling_to_csv(config)
 	fmt.Println("end")
 }
