@@ -1,16 +1,18 @@
 package totalling
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/tomohiro-hata/log-analysis/pkg/config"
 )
 
-func totalling_to_csv(conf config.Config) {
+func Log_to_csv(conf config.Config) {
 	// 結果格納変数
 	var result []Totalling
 	// 月格納変数
@@ -26,25 +28,30 @@ func totalling_to_csv(conf config.Config) {
 		defer file.Close()
 
 		// reader作成
-		reader := csv.NewReader(file)
-		// 全行読み取り([][]stringで返ってくる)
-		rows, err := reader.ReadAll()
-		// エラーハンドリング
-		if err != nil {
-			fmt.Println(err)
-		}
+		reader := bufio.NewScanner(file)
+		var rows [][]string
+		var flag bool = true
 		// 行読み出し(初期処理)
-		for _, row := range rows {
+		for reader.Scan() {
+			if flag {
+				flag = false
+				continue
+			}
+			row := strings.Split(reader.Text(), ",")
+			for index, tmp := range row {
+				row[index] = strings.Replace(tmp, "\"", "", -1)
+			}
+			rows = append(rows, row)
 			// 結果変数が空の場合(追加)
 			if len(result) == 0 {
 				var tmp_result Totalling
-				tmp_result.Username = row[1]
+				tmp_result.Username = row[2]
 				result = append(result, tmp_result)
 			} else {
 				// ユーザ名が存在しない場合追加
-				if username_find(row[1], result) {
+				if username_find(row[2], result) {
 					var tmp_result Totalling
-					tmp_result.Username = row[1]
+					tmp_result.Username = row[2]
 					result = append(result, tmp_result)
 				}
 			}
@@ -60,12 +67,10 @@ func totalling_to_csv(conf config.Config) {
 			}
 		}
 		// カウント配列初期化
-		var tmp_array []int32
-		for i := 0; i < len(dates.Dates); i++ {
-			tmp_array = append(tmp_array, 0)
-		}
-		for j := 0; j < len(result); j++ {
-			result[j].Result = tmp_array
+		for i := 0; i < len(result); i++ {
+			for j := 0; j < len(dates.Dates); j++ {
+				result[i].Result = append(result[i].Result, 0)
+			}
 		}
 		// ログ集計(月別)
 		for _, tmp_row := range rows {
@@ -73,12 +78,12 @@ func totalling_to_csv(conf config.Config) {
 			tmp_sec, _ := strconv.ParseInt(tmp_row[0], 10, 64)
 			target_date := time.Unix(tmp_sec/1000, 0)
 			// 加算Indexの捜索
-			user_index := username_find_index(tmp_row[1], result)
+			user_index := username_find_index(tmp_row[2], result)
 			date_index := date_find_index(target_date, dates)
 			// 配列内に存在するもののみ加算
 			if user_index != -1 {
 				if date_index != -1 {
-					tmp_num, _ := strconv.Atoi(tmp_row[2])
+					tmp_num, _ := strconv.Atoi(tmp_row[3])
 					result[user_index].Result[date_index] += int32(tmp_num)
 				}
 			}

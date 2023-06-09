@@ -22,6 +22,6 @@ func main() {
 	json.Unmarshal(file, &config)
 	fmt.Println(config)
 	fmt.Println("start")
-	totalling.totalling_to_csv(config)
+	totalling.Log_to_csv(config)
 	fmt.Println("end")
 }
